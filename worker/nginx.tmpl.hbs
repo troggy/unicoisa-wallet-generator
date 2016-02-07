@@ -1,0 +1,28 @@
+server {
+  listen 80;
+
+	server_name {{walletName}}.coloredcoins.org;
+
+	root {{targetWalletDir}}/public;
+
+	index index.html;
+
+	gzip on;
+	gzip_comp_level 6;
+	gzip_min_length 1100;
+	gzip_buffers 16 8k;
+	gzip_proxied any;
+	gzip_types
+	    text/css
+	    text/js
+	    text/javascript
+	    application/javascript
+	    application/x-javascript
+	    application/json;
+
+	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		try_files $uri $uri/ =404;
+	}
+}

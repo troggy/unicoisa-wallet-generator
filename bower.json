@@ -1,0 +1,19 @@
+{
+  "name": "unicoisa-wallet-generator",
+  "description": "Simple web UI to generate and deploy Unicoisa wallet tailored to specific asset",
+  "main": "index.js",
+  "authors": [
+    "Kosta Korenkov <7r0ggy@gmail.com>"
+  ],
+  "license": "MIT",
+  "moduleType": [],
+  "homepage": "http://github.com/troggy/unicoisa-wallet-generator",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {}
+}

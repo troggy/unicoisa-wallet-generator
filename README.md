@@ -1,0 +1,1 @@
+# unicoisa-wallet-generator

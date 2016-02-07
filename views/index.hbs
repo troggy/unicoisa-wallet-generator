@@ -1,0 +1,40 @@
+<div class="form-box pure-g">
+  <div class="pure-u-1-2 logo">
+    <img src="images/logo.png"/>
+  </div>
+  <div class="pure-u-1-2">
+    <form action="/wallet" method="post" class="input-form pure-form pure-form-stacked">
+        <fieldset>
+            <div class="pure-control-group field">
+                <label for="walletName">Wallet Name <small>will be used in url http://&lt;name&gt;.coloredcoins.org/</small></label>
+                <input id="walletName" name="walletName" type="text" 
+                  placeholder="Wallet Name" pattern="[A-Za-z][A-Za-z0-9-]*[A-Za-z0-9]" required>
+            </div>
+
+            <div class="pure-control-group field">
+                <label for="assetId">Asset ID</label>
+                <input id="assetId" name="assetId" type="text" placeholder="Asset ID" required>
+            </div>
+
+            <div class="pure-control-group field">
+                <label for="assetName">Asset Name</label>
+                <input id="assetName" name="assetName" type="text" placeholder="Asset Name" required>
+            </div>
+            
+            <div class="pure-control-group field">
+                <label for="symbol">Symbol <small>e.g. <strong>$</strong></small></label>
+                <input id="symbol" name="symbol" type="text" placeholder="Symbol">
+            </div>
+
+            <div class="pure-control-group field">
+                <label for="pluralSymbol">Symbol in plural form <small>(optional)</small></label>
+                <input id="pluralSymbol" name="pluralSymbol" type="text" placeholder="Symbol in plural form">
+            </div>
+
+            <div class="pure-controls controls">
+                <button type="submit" class="pure-button pure-button-primary">Create web wallet</button>
+            </div>
+        </fieldset>
+    </form>
+  </div>
+</div>

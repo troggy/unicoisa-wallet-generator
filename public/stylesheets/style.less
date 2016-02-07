@@ -1,0 +1,78 @@
+.border-box {
+  -webkit-box-sizing: border-box;
+   -moz-box-sizing: border-box;
+        box-sizing: border-box;
+}
+
+.centered-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  .border-box();
+  .centered-content();
+  
+  padding: 50px;
+  font-family: 'Open Sans', sans-serif;
+  color: #333333;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.form-box {
+  width: 100%;
+  
+  .logo {
+    .centered-content();
+  }
+  
+}
+
+.input-form {
+  margin-top: 15px;
+  width: 400px;
+}
+
+.field {
+  padding: 5px 0;  
+  
+  input {
+    width: 100%;
+  }
+  label > small {
+    color: darkgray;
+  }
+}
+
+.controls {
+    padding: 15px 0;
+    
+    button {
+      width: 100%;
+    }
+}
+
+.success-box {
+  padding: 40px;
+  width: 400px;
+  
+  .wait-icon {
+    font-size: 140px;
+    padding-right: 20px;
+  }
+  
+  .wallet-link {
+    font-weight: bold;
+  }
+}
+
+
+
