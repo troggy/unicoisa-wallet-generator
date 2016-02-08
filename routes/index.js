@@ -3,11 +3,17 @@
 let express = require('express'),
     router = express.Router(),
     kue = require('kue'),
-    queue = kue.createQueue();
+    queue = kue.createQueue(),
+    checkName = require('../lib/checkName');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index');
+});
+
+router.get('/name', function(req, res, next) {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(checkName(req.query.walletName));
 });
 
 router.post('/wallet', function(req, res, next) {

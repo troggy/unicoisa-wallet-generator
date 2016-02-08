@@ -15,5 +15,7 @@
     "test",
     "tests"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "hint.css": "~2.0.0"
+  }
 }

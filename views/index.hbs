@@ -6,18 +6,18 @@
     <form action="/wallet" method="post" class="input-form pure-form pure-form-stacked">
         <fieldset>
             <div class="pure-control-group field">
-                <label for="walletName">Wallet Name <small>will be used in url http://&lt;name&gt;.coloredcoins.org/</small></label>
+                <label for="walletName">Wallet Name<span class="req">*</span> <small>will be used in url http://&lt;name&gt;.coloredcoins.org/</small></label>
                 <input id="walletName" name="walletName" type="text" 
                   placeholder="Wallet Name" pattern="[A-Za-z][A-Za-z0-9-]*[A-Za-z0-9]" required>
             </div>
 
             <div class="pure-control-group field">
-                <label for="assetId">Asset ID</label>
+                <label for="assetId">Asset ID<span class="req">*</span></label>
                 <input id="assetId" name="assetId" type="text" placeholder="Asset ID" required>
             </div>
 
             <div class="pure-control-group field">
-                <label for="assetName">Asset Name</label>
+                <label for="assetName">Asset Name<span class="req">*</span></label>
                 <input id="assetName" name="assetName" type="text" placeholder="Asset Name" required>
             </div>
             
@@ -38,3 +38,25 @@
     </form>
   </div>
 </div>
+<script src="/javascripts/utils.js"></script>
+<script>
+(function() {
+  var walletName = document.getElementById('walletName');
+  
+  var debouncedCall = utils.debounce(function(val) {
+      utils.get('/name?walletName=' + encodeURIComponent(val), function(err, data) {
+          if (err) {
+            console.error(err);
+            walletName.setCustomValidity('Cannot verify wallet name');
+          } else {
+            walletName.setCustomValidity(data);
+          }
+      });
+  });
+
+  
+  walletName.addEventListener('keyup', function(event) {
+    debouncedCall(event.target.value);
+  }, false);
+})();
+</script>

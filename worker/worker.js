@@ -1,21 +1,30 @@
 'use strict';
 
-let argv = require('yargs').argv,
-    kue = require('kue'),
+let kue = require('kue'),
     queue = kue.createQueue(),
-    Task = require('./task');
+    Task = require('./task'),
+    config = require('../config');
     
-    
-if (!argv.homeDir || !argv.tmplCopayDir) {
-  console.log(" Usage: node worker.js --homeDir=<where to install> --tmplCopayDir=<copay to clone>");
+if (!config.templateCopayDir) {
+  console.log('Missing "templateCopayDir" property in config.json');
+  process.exit(1);
+}
+
+if (!config.targetDir) {
+  console.log('Missing "targetDir" property in config.json');
   process.exit(1);
 }
 
 queue.process('NewWallet', function(job, done){
   let params = job.data;
   console.log("Got wallet request: " + JSON.stringify(params));
+  params = Object.assign(params, {
+      templateCopayDir: config.templateCopayDir,
+      targetDir: config.targetDir
+  });
   new Task(params).execute()
     .then(function() {
+      console.log(`Done: http://${params.walletName}.coloredcoins.org`);
       done();
     })
     .catch(function(err) {
@@ -23,4 +32,6 @@ queue.process('NewWallet', function(job, done){
       done(err);
     });
 });
+
+console.log('Waiting for new jobs in queue..');
 

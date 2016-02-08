@@ -2,10 +2,11 @@
 
 let $ = require('preconditions').singleton(),
     path = require('path'),    
-    execute = require('./shell').execute,
     fs = require('fs'),
-    Handlebars = require('handlebars');
-
+    Handlebars = require('handlebars'),
+    execute = require('./shell').execute,
+    checkName = require('../lib/checkName');
+    
 function Task(_params) {
   
   this._init = function(params) {
@@ -15,14 +16,10 @@ function Task(_params) {
   };
   
   this._checkWalletName = function(params) {
-    let walletName = params.walletName;
-    $.checkArgument(walletName.match(/^[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9]$/), `Incorrect wallet name: ${walletName}`);
-    var files = fs.readdirSync(params.targetDir)
-    if (files.indexOf(walletName) != -1) {
-      throw new Error(`Wallet name "${walletName}" is already used`);
-    }
-    if (["bws", "copay", "www", "ftp", "mail"].indexOf(walletName) != -1) {
-      throw new Error(`Wallet name "${walletName}" is not allowed`);
+    let error = checkName(params.walletName);
+    
+    if (error) {
+      throw new Error(error);
     }
   };
   
@@ -31,7 +28,7 @@ function Task(_params) {
     $.shouldBeDefined(params.assetName, "assetName is required");
     $.shouldBeDefined(params.walletName, "walletName is required");
     $.shouldBeDefined(params.targetDir, "targetDir is required");
-    $.shouldBeDefined(params.tmplCopayDir, "tmplCopayDir is required");
+    $.shouldBeDefined(params.templateCopayDir, "templateCopayDir is required");
     
     this._checkWalletName(params);
     
@@ -43,7 +40,7 @@ function Task(_params) {
   
   this._createCopayCopy = function() {
     return execute(
-      `mkdir -p ${this.targetWalletDir} && cp -r ${this.params.tmplCopayDir}/* ${this.targetWalletDir}/`
+      `mkdir -p ${this.targetWalletDir} && cp -r ${this.params.templateCopayDir}/* ${this.targetWalletDir}/`
     );
   };
   
@@ -66,7 +63,7 @@ function Task(_params) {
             if (err) { 
               return reject(err);
             }
-            var configStr = Handlebars.compile(template.toString())({
+            let configStr = Handlebars.compile(template.toString())({
                 walletName: this.params.walletName,
                 targetWalletDir: this.targetWalletDir
             });
@@ -95,4 +92,4 @@ function Task(_params) {
   this._init(_params);
 }
 
-module.exports.Task = Task;
+module.exports = Task;

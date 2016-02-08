@@ -7,7 +7,7 @@ let chai = require("chai"),
     fs = require('fs'),
     path = require('path'),
     rimraf = require('rimraf').sync,
-    Task = require('../worker/task').Task;
+    Task = require('../worker/task');
  
 chai.use(chaiAsPromised);
 chai.should();
@@ -21,7 +21,7 @@ describe('Task', function() {
     symbol: "dollar",
     pluralSymbol: "dollars",
     targetDir: "/tmp",
-    tmplCopayDir: "/tmp/copay"
+    templateCopayDir: "/tmp/copay"
   };
   
   fs.mkdir('/tmp/copay'); // copy copay there and make npm i && bower install && grunt build
@@ -54,8 +54,8 @@ describe('Task', function() {
       expect(() => { new Task(params)}).to.throw(Error);
     });
 
-    it('should require tmplCopayDir', function () {
-      let params = cloneWith(defaultParams, { tmplCopayDir: undefined });
+    it('should require templateCopayDir', function () {
+      let params = cloneWith(defaultParams, { templateCopayDir: undefined });
       expect(() => { new Task(params)}).to.throw(Error);
     });
     
@@ -72,35 +72,6 @@ describe('Task', function() {
       task.params.pluralSymbol.should.eq('units');
     });     
     
-    it('should allow only alphanumeric wallet names with optional dash in the middle', function () {
-      let badNames = [ 
-        "1231", "-name", "name-", "-", "../", "/tmp"
-      ];
-      badNames.forEach((name) => {
-        let params = cloneWith(defaultParams, { walletName: name });
-        expect(() => { new Task(params)}, `Wallet name "${name}" should not be accepted`)
-          .to.throw(Error);
-      });
-    });
-
-    it('should not allow already used wallet names', function () {
-      let name = "copay",
-          params = cloneWith(defaultParams, { walletName: name });
-      expect(() => { new Task(params)}, `Wallet name "${name}" should not be accepted`)
-        .to.throw(Error);
-    });
-    
-    it('should not allow reserved wallet names', function () {
-      let badNames = [ 
-        "bws", "copay", "www", "ftp", "mail"
-      ];
-      badNames.forEach((name) => {
-        let params = cloneWith(defaultParams, { walletName: name });
-        expect(() => { new Task(params)}, `Wallet name "${name}" should not be accepted`)
-          .to.throw(Error);
-      });
-    });
-
   });
   
   describe('#execution', function () {
@@ -111,7 +82,7 @@ describe('Task', function() {
     });
 
     it('should stop if step failed', function () {
-      let params = cloneWith(defaultParams, { tmplCopayDir: "/tmp/copay2" }),
+      let params = cloneWith(defaultParams, { templateCopayDir: "/tmp/copay2" }),
           task = new Task(params);
       sinon.spy(task, '_buildAndSetup');
       
