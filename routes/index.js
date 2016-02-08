@@ -33,7 +33,7 @@ router.post('/wallet', function(req, res, next) {
       }
     });
     
-    res.render('queued', { link: `http://${walletRequest.walletName}.coloredcoins.org` });
+    res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
 });
 
 
