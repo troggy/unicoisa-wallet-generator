@@ -24,7 +24,7 @@ queue.process('NewWallet', function(job, done){
   });
   new Task(params).execute()
     .then(function() {
-      console.log(`Done: http://${params.walletName}.coloredcoins.org`);
+      console.log(`Done: http://${params.walletName}.coluwalletservice.com`);
       done();
     })
     .catch(function(err) {
