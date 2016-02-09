@@ -116,6 +116,21 @@ a {
     opacity: 1;
 }
 
+/* logo uploader */
+
+.file-container {
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.file-container [type=file] {
+  cursor: inherit;
+  display: none;
+  height: 0;
+  position: absolute;
+  left: -9999px;
+}
+
 
 @media screen and (min-width: 64em) {
   body {

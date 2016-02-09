@@ -8,7 +8,7 @@
     </div>
   </div>
   <div class="pure-u-1 pure-u-lg-1-2 input-form">
-    <form action="/wallet" method="post" class="pure-form pure-form-stacked">
+    <form action="/wallet" method="post" enctype="multipart/form-data" class="pure-form pure-form-stacked">
         <fieldset>
             <div class="pure-control-group field">
                 <label for="walletName">Wallet name<span class="req">*</span> <small>will be used in url http://&lt;name&gt;.coluwalletservice.com/</small></label>
@@ -58,10 +58,20 @@
                     </div>
                   </div>
                 </div>
-                <div class="pure-u-1-3">
-                  
-                </div>
             </div>
+            
+            <div class="pure-control-group field">
+                <label>Logo</label>
+
+                <label class="file-container pure-button">
+                  <span id="uploadPrompt">Select file</span>	
+                  <div id="selectedFile" style="display:none;">
+                    <span id="filename"></span>	
+                  </div>
+                  <input type="file" name="file" id="uploadInput"/>
+                </label>
+            </div>
+
 
 
             <div class="pure-controls controls">
@@ -78,6 +88,8 @@
   var colors = ["#1abc9c","#2ecc71","#3498db","#9b59b6","#34495e","#16a085","#27ae60","#2980b9",
         "#8e44ad","#2c3e50","#f1c40f","#e67e22","#e74c3c","#f39c12","#d35400","#c0392b","#2C3E50"],
       walletName = document.getElementById('walletName');
+  
+  document.getElementById('uploadInput').addEventListener('change', utils.showFile);
   
   var debouncedCall = utils.debounce(function(val) {
       utils.get('/name?walletName=' + encodeURIComponent(val), function(err, data) {

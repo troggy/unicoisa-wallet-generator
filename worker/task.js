@@ -13,6 +13,10 @@ function Task(_params) {
     this._checkParams(params);
     this.params = params;
     this.targetWalletDir = path.join(params.targetDir, params.walletName);
+    if (params.logo) {
+      params.logoPath = params.logo;
+      params.logo = "custom-logo" + path.extname(params.logo);
+    }
   };
   
   this._checkWalletName = function(params) {
@@ -69,6 +73,13 @@ function Task(_params) {
     return this._compileHbsFile('templates/config.tmpl.hbs', this.params, `${this.targetWalletDir}/public/js/config.js`);
   }
   
+  this._copyLogo = function() {
+    if (this.params.logo) {
+      fs.createReadStream(this.params.logoPath).pipe(fs.createWriteStream(`${this.targetWalletDir}/public/img/${this.params.logo}`));
+      fs.createReadStream(this.params.logoPath).pipe(fs.createWriteStream(`${this.targetWalletDir}/public/img/${this.params.logo}`));
+    }
+  }
+  
   this._configureNginx = function() {
     let params = {
         walletName: this.params.walletName,
@@ -84,6 +95,7 @@ function Task(_params) {
   this.execute = function() {
     return this._createCopayCopy()
       .then(this._createConfigFile.bind(this))
+      .then(this._copyLogo.bind(this))
       .then(this._configureNginx.bind(this))
       .then(this._restartNginx.bind(this));
   };

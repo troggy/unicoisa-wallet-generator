@@ -1,6 +1,7 @@
 'use strict';
 
 let express = require('express'),
+    formidable = require('formidable'),
     router = express.Router(),
     kue = require('kue'),
     queue = kue.createQueue(),
@@ -17,25 +18,31 @@ router.get('/name', function(req, res, next) {
 });
 
 router.post('/wallet', function(req, res, next) {
-    let walletRequest = { 
-      walletName: req.body.walletName,
-      assetId: req.body.assetId,
-      assetName: req.body.assetName,
-      symbol: req.body.symbol,
-      pluralSymbol: req.body.pluralSymbol,
-      mainColor: req.body.mainColor,
-      secondaryColor: req.body.secondaryColor
-    };
-
-    var job = queue.create("NewWallet", walletRequest).save(function(err){
-      if( !err ) { 
-        console.log("Request for new wallet queued up [" + job.id + "]: " + JSON.stringify(walletRequest));
-      } else {
-        console.error(err);
-      }
-    });
     
-    res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
+    
+    var form = new formidable.IncomingForm();
+ 
+    form.parse(req, function(err, fields, files) {
+      let walletRequest = { 
+        walletName: fields.walletName,
+        assetId: fields.assetId,
+        assetName: fields.assetName,
+        symbol: fields.symbol,
+        pluralSymbol: fields.pluralSymbol,
+        mainColor: fields.mainColor,
+        secondaryColor: fields.secondaryColor,
+        logo: files && files.file ? files.file.path : ''
+      };
+      
+      var job = queue.create("NewWallet", walletRequest).save(function(err){
+        if( !err ) { 
+          console.log("Request for new wallet queued up [" + job.id + "]: " + JSON.stringify(walletRequest));
+        } else {
+          console.error(err);
+        }
+      });
+      res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
+    });
 });
 
 

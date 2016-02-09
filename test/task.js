@@ -20,13 +20,14 @@ describe('Task', function() {
     walletName: "walletName",
     symbol: "dollar",
     pluralSymbol: "dollars",
-    mainColor: "#color1",
-    secondaryColor: "#color2",
+    mainColor: "#ffab00",
+    secondaryColor: "#333",
     targetDir: "/tmp",
-    templateCopayDir: "/tmp/copay"
+    templateCopayDir: "/tmp/copay",
+    logo: "/tmp/logotipe.jpg"
   };
   
-  fs.mkdir('/tmp/copay'); // copy copay there and make npm i && bower install && grunt build
+  fs.mkdir('/tmp/copay'); // copy copay there and make npm i && bower install && grunt
   
   function cloneWith(arr, args) {
     var clone = JSON.parse(JSON.stringify(arr));

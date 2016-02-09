@@ -35,4 +35,27 @@ utils = new (function() {
     xhr.open("GET", url, true);
     xhr.send();
   };
+  
+  this.showFile = function() {
+    var uploadInput = document.getElementById('uploadInput');
+    
+    if (uploadInput.value != ''){
+        document.getElementById('uploadPrompt').style.display = 'none';
+        document.getElementById('selectedFile').style.display = '';
+        var filenameSpan = document.getElementById('filename'),
+            filenameParts = uploadInput.value.split('\\'),
+            filename = filenameParts[filenameParts.length - 1];
+        while(filenameSpan.firstChild) {
+          filenameSpan.removeChild( filenameSpan.firstChild );
+        }
+        filenameSpan.appendChild( document.createTextNode(filename) );
+      }
+  };
+
+  this.selectNewFile = function() {
+    document.getElementById('uploadPrompt').style.display = '';
+    document.getElementById('selectedFile').style.display = 'none';
+    document.getElementById('uploadInput').value = '';
+  };
+  
 })();
