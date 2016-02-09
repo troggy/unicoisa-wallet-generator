@@ -20,6 +20,8 @@ describe('Task', function() {
     walletName: "walletName",
     symbol: "dollar",
     pluralSymbol: "dollars",
+    mainColor: "#color1",
+    secondaryColor: "#color2",
     targetDir: "/tmp",
     templateCopayDir: "/tmp/copay"
   };
@@ -84,11 +86,11 @@ describe('Task', function() {
     it('should stop if step failed', function () {
       let params = cloneWith(defaultParams, { templateCopayDir: "/tmp/copay2" }),
           task = new Task(params);
-      sinon.spy(task, '_buildAndSetup');
+      sinon.spy(task, '_createConfigFile');
       
       let promise = task.execute();
       
-      task._buildAndSetup.callCount.should.eq(0, "_buildAndSetup should not be called");
+      task._createConfigFile.callCount.should.eq(0, "_buildAndSetup should not be called");
       return promise.should.be.rejected;
     });
     

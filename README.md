@@ -25,7 +25,7 @@ Edit config.json to match your settings:
 
 To prepare ColuCopay (project [Unicoisa](https://github.com/troggy/unicoisa)):
 ````
- git clone https://github.com/troggy/unicoisa copay && cd copay && npm install && bower install && grunt build
+ git clone https://github.com/troggy/unicoisa copay && cd copay && npm install && bower install && grunt
 ````
 
 ### Start app

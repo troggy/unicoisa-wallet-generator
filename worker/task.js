@@ -38,6 +38,23 @@ function Task(_params) {
     }
   };
   
+  this._compileHbsFile = function(sourceFile, data, destFile) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(sourceFile, (err, template) => {
+            if (err) { 
+              return reject(err);
+            }
+            let compiledData = Handlebars.compile(template.toString())(data);
+            fs.writeFile(destFile, compiledData, (err) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            })
+        });
+    });
+  }
+  
   this._createCopayCopy = function() {
     return execute(
       `mkdir -p ${this.targetWalletDir} && cp -r ${this.params.templateCopayDir}/* ${this.targetWalletDir}/`
@@ -48,33 +65,16 @@ function Task(_params) {
     return execute(`cd ${this.targetWalletDir} && npm install && bower install`);
   };
   
-  this._buildAndSetup = function() {
-    return execute(`cd ${this.targetWalletDir} && grunt configure`, [
-      `--assetId="${this.params.assetId}"`,
-      `--assetName="${this.params.assetName}"`,
-      `--assetSymbol="${this.params.symbol}"`,
-      `--assetPluralSymbol="${this.params.pluralSymbol}"`
-    ]);
-  };
+  this._createConfigFile = function() {
+    return this._compileHbsFile('templates/config.tmpl.hbs', this.params, `${this.targetWalletDir}/public/js/config.js`);
+  }
   
   this._configureNginx = function() {
-    return new Promise((resolve, reject) => {
-        fs.readFile('worker/nginx.tmpl.hbs', (err, template) => {
-            if (err) { 
-              return reject(err);
-            }
-            let configStr = Handlebars.compile(template.toString())({
-                walletName: this.params.walletName,
-                targetWalletDir: this.targetWalletDir
-            });
-            fs.writeFile(`/etc/nginx/sites-enabled/${this.params.walletName}`, configStr, (err) => {
-              if (err) {
-                return reject(err);
-              }
-              resolve();
-            })
-        });
-    });
+    let params = {
+        walletName: this.params.walletName,
+        targetWalletDir: this.targetWalletDir
+    };
+    return this._compileHbsFile('templates/nginx.tmpl.hbs', params, `/etc/nginx/sites-enabled/${this.params.walletName}`);
   };
   
   this._restartNginx = function() {
@@ -83,8 +83,7 @@ function Task(_params) {
   
   this.execute = function() {
     return this._createCopayCopy()
-      //.then(this._fetchDependencies.bind(this))
-      .then(this._buildAndSetup.bind(this))
+      .then(this._createConfigFile.bind(this))
       .then(this._configureNginx.bind(this))
       .then(this._restartNginx.bind(this));
   };

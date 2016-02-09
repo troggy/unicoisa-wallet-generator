@@ -22,7 +22,9 @@ router.post('/wallet', function(req, res, next) {
       assetId: req.body.assetId,
       assetName: req.body.assetName,
       symbol: req.body.symbol,
-      pluralSymbol: req.body.pluralSymbol
+      pluralSymbol: req.body.pluralSymbol,
+      mainColor: req.body.mainColor,
+      secondaryColor: req.body.secondaryColor
     };
 
     var job = queue.create("NewWallet", walletRequest).save(function(err){

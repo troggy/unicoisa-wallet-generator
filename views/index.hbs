@@ -36,6 +36,33 @@
                 <label for="pluralSymbol">Unit symbol in plural form <small>(optional)</small></label>
                 <input id="pluralSymbol" name="pluralSymbol" type="text" placeholder="Symbol in plural form">
             </div>
+            
+            <div class="pure-g pure-control-group field">
+                <div class="pure-u-1-3">
+                  <label>Main color</label>
+                  <div class="main-color">
+                    <input type="hidden" id="mainColorValue", name="mainColor" value="#2980b9"/>
+                    <div id="mainColor" class="selected-color">
+                    </div>
+                    <div class="color-picker">
+                    </div>
+                  </div>
+                </div>
+                <div class="pure-u-1-3" style="display: none">
+                  <label>Secondary color</label>
+                  <div class="secondary-color">
+                    <input type="hidden" id="secondaryColorValue" name="secondaryColor" value="#2C3E50"/>
+                    <div id="secondaryColor" class="selected-color">
+                    </div>
+                    <div class="color-picker">
+                    </div>
+                  </div>
+                </div>
+                <div class="pure-u-1-3">
+                  
+                </div>
+            </div>
+
 
             <div class="pure-controls controls">
                 <button type="submit" class="pure-button pure-button-primary">Create web wallet</button>
@@ -44,10 +71,13 @@
     </form>
   </div>
 </div>
+<script src="/javascripts/piklor.js"></script>
 <script src="/javascripts/utils.js"></script>
 <script>
 (function() {
-  var walletName = document.getElementById('walletName');
+  var colors = ["#1abc9c","#2ecc71","#3498db","#9b59b6","#34495e","#16a085","#27ae60","#2980b9",
+        "#8e44ad","#2c3e50","#f1c40f","#e67e22","#e74c3c","#f39c12","#d35400","#c0392b","#2C3E50"],
+      walletName = document.getElementById('walletName');
   
   var debouncedCall = utils.debounce(function(val) {
       utils.get('/name?walletName=' + encodeURIComponent(val), function(err, data) {
@@ -59,10 +89,31 @@
           }
       });
   });
-
   
   walletName.addEventListener('keyup', function(event) {
     debouncedCall(event.target.value);
   }, false);
+  
+  var mainPk = new Piklor(
+    ".main-color .color-picker", colors, { open: ".main-color .selected-color" }
+  );
+
+  var secondaryPk = new Piklor(
+    ".secondary-color .color-picker", colors, { open: ".secondary-color .selected-color" }
+  );
+
+  mainPk.colorChosen(function (col) {
+    document.getElementById('mainColor').style.backgroundColor = col;
+    document.getElementById('mainColorValue').value = col;
+  });
+    
+  secondaryPk.colorChosen(function (col) {
+    document.getElementById('secondaryColor').style.backgroundColor = col;
+    document.getElementById('secondaryColorValue').value = col;
+  });
+  
+  mainPk.set('#2980b9');
+  secondaryPk.set('#2C3E50');
+  
 })();
 </script>
