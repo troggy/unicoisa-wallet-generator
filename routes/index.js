@@ -31,7 +31,8 @@ router.post('/wallet', function(req, res, next) {
         pluralSymbol: fields.pluralSymbol,
         mainColor: fields.mainColor,
         secondaryColor: fields.secondaryColor,
-        logo: files && files.file ? files.file.path : ''
+        logo: files && files.file ? files.file.path : '',
+        coluApiKey: fields.coluApiKey
       };
       
       var job = queue.create("NewWallet", walletRequest).save(function(err){
