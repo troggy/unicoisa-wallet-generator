@@ -31,7 +31,7 @@ router.post('/wallet', function(req, res, next) {
         pluralSymbol: fields.pluralSymbol,
         mainColor: fields.mainColor,
         secondaryColor: fields.secondaryColor,
-        logo: files && files.file ? files.file.path : '',
+        logo: files.file.name ? files.file.path : '',
         coluApiKey: fields.coluApiKey
       };
       
