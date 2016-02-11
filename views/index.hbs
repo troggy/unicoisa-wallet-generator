@@ -87,6 +87,9 @@
 (function() {
   var colors = ["#1abc9c","#2ecc71","#3498db","#9b59b6","#34495e","#16a085","#27ae60","#2980b9",
         "#8e44ad","#2c3e50","#f1c40f","#e67e22","#e74c3c","#f39c12","#d35400","#c0392b","#2C3E50"],
+      darkColors = ['#443161', '#3B3162', '#313C61', '#314D5E', '#304544', '#304939',
+                    '#475130', '#3E3E30', '#3E3730', '#3E3430', '#3B3036', '#383039',
+                    '#353139', '#31313A', '#303937'],
       walletName = document.getElementById('walletName');
   
   document.getElementById('uploadInput').addEventListener('change', utils.showFile);
@@ -107,11 +110,11 @@
   }, false);
   
   var mainPk = new Piklor(
-    ".main-color .color-picker", colors, { open: ".main-color .selected-color" }
+    ".main-color .color-picker", colors.concat(darkColors), { open: ".main-color .selected-color" }
   );
 
   var secondaryPk = new Piklor(
-    ".secondary-color .color-picker", colors, { open: ".secondary-color .selected-color" }
+    ".secondary-color .color-picker", darkColors, { open: ".secondary-color .selected-color" }
   );
 
   mainPk.colorChosen(function (col) {
