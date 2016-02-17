@@ -11,6 +11,9 @@ class UpdateTask extends Task {
   
   constructor(params) {
     super(params);
+    if (this.params.coluApiKey) {
+      delete this.params.coluApiKey;
+    };
   }
   
   _checkWalletName(params) {

@@ -27,7 +27,7 @@ describe('UpdateTask', function() {
           pluralSymbol: "dollars",
           mainColor: "#ffab00",
           secondaryColor: "#333",
-          logo: "/tmp/logotipe.jpg"
+          coluApiKey: "bla"
         },
         job: {
           targetDir: "/tmp",
@@ -35,12 +35,16 @@ describe('UpdateTask', function() {
         }
       },
       params;
+      
+  before(() => {
+    let task = new CreateTask(defaultParams);
+    console.log(`${walletName}`);
+    return task._createConfigFile();
+  });
+
   
   beforeEach(() => {
     params = JSON.parse(JSON.stringify(defaultParams));
-    let task = new CreateTask(params);
-    console.log(`${walletName}`);
-    return task._createConfigFile();
   });
   
   it('successfull flow', function () {
@@ -51,7 +55,7 @@ describe('UpdateTask', function() {
       pluralSymbol: "dollars!",
       mainColor: "#ffab01",
       secondaryColor: "#334",
-      logo: "/tmp/logotipe.jpg"
+      coluApiKey: "bla"
     });
     let task = new UpdateTask(params);
     return task._updateConfigFile().then(() => {
@@ -61,5 +65,19 @@ describe('UpdateTask', function() {
         });
     });
   });
+  
+  it('should not allow changing api key', function () {
+    params.wallet = _.extend(params.wallet, {
+      coluApiKey: 'dfvdfvdf'
+    });
+    let task = new UpdateTask(params);
+    return task._updateConfigFile().then(() => {
+        return Promise.promisify(fs.readFile)(task.configFileRaw).then((newConfig) => {
+            newConfig = JSON.parse(newConfig.toString());
+            newConfig.coluApiKey.should.be.equal(defaultParams.wallet.coluApiKey);
+        });
+    });
+  });
+
 
 });

@@ -11,7 +11,7 @@ class Task {
   
   constructor(params) {
     this._checkParams(params);
-    this.params = params.wallet;
+    this.params = Object.assign({}, params.wallet);
     this.targetDir = params.job.targetDir;
     this.templateCopayDir = params.job.templateCopayDir;
     this.targetWalletDir = path.join(this.targetDir, this.params.walletName);
