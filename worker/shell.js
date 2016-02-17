@@ -6,11 +6,11 @@ module.exports.execute = function (cmd, args) {
   args = args || [];
   return new Promise((resolve, reject) => {
     cmd = cmd + " " + args.join(" ");
-    console.log(cmd);
+    console.log("Executing: " + cmd);
     exec(cmd, function (error, stdout, stderr) {
-      console.log(stdout);
-      console.log(error);
-      console.log(error);
+      stdout && console.log(stdout);
+      stderr && console.log(stderr);
+      error && console.log(error);
       if (stderr || error) {
         reject(stderr || error);
       } else {

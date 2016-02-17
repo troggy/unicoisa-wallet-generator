@@ -2,7 +2,8 @@
 
 let kue = require('kue'),
     queue = kue.createQueue(),
-    Task = require('./task'),
+    CreateTask = require('./createTask'),
+    UpdateTask = require('./updateTask'),
     config = require('../config');
     
 if (!config.templateCopayDir) {
@@ -18,17 +19,41 @@ if (!config.targetDir) {
 queue.process('NewWallet', function(job, done){
   let params = job.data;
   console.log("Got wallet request: " + JSON.stringify(params));
-  params = Object.assign(params, {
+  params = {
+    wallet: params,
+    job: {
       templateCopayDir: config.templateCopayDir,
       targetDir: config.targetDir
-  });
-  new Task(params).execute()
+    }
+  };
+  new CreateTask(params).execute()
     .then(function() {
-      console.log(`Done: http://${params.walletName}.coluwalletservice.com`);
+      console.log(`Done: http://${params.wallet.walletName}.coluwalletservice.com`);
       done();
     })
     .catch(function(err) {
-      console.log(`Failed to process ${params.walletName} request: ` + err);
+      console.log(`Failed to process "${params.wallet.walletName}" request: ` + err);
+      done(err);
+    });
+});
+
+queue.process('UpdateWallet', function(job, done){
+  let params = job.data;
+  console.log("Got update wallet request: " + JSON.stringify(params));
+  params = {
+    wallet: params,
+    job: {
+      templateCopayDir: config.templateCopayDir,
+      targetDir: config.targetDir
+    }
+  };
+  new UpdateTask(params).execute()
+    .then(function() {
+      console.log(`Updated: http://${params.wallet.walletName}.coluwalletservice.com`);
+      done();
+    })
+    .catch(function(err) {
+      console.log(`Failed to process update "${params.wallet.walletName}" request: ` + err);
       done(err);
     });
 });

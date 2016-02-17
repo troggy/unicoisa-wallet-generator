@@ -17,25 +17,28 @@ router.get('/name', function(req, res, next) {
   res.send(checkName(req.query.walletName));
 });
 
+var whitelistParams = function(params) {
+  return { 
+    walletName: params.walletName,
+    assetId: params.assetId,
+    assetName: params.assetName,
+    symbol: params.symbol,
+    pluralSymbol: params.pluralSymbol,
+    mainColor: params.mainColor,
+    secondaryColor: params.secondaryColor,
+    coluApiKey: params.coluApiKey
+  };
+};
+
 router.post('/wallet', function(req, res, next) {
-    
-    
+
     var form = new formidable.IncomingForm();
  
     form.parse(req, function(err, fields, files) {
-      let walletRequest = { 
-        walletName: fields.walletName,
-        assetId: fields.assetId,
-        assetName: fields.assetName,
-        symbol: fields.symbol,
-        pluralSymbol: fields.pluralSymbol,
-        mainColor: fields.mainColor,
-        secondaryColor: fields.secondaryColor,
-        logo: files.file.name ? files.file.path : '',
-        coluApiKey: fields.coluApiKey
-      };
+      let walletRequest = whitelistParams(fields);
+      walletRequest.logo = files.file.name ? files.file.path : '';
       
-      var job = queue.create("NewWallet", walletRequest).save(function(err){
+      let job = queue.create("NewWallet", walletRequest).save(function(err){
         if( !err ) { 
           console.log("Request for new wallet queued up [" + job.id + "]: " + JSON.stringify(walletRequest));
         } else {
@@ -44,6 +47,19 @@ router.post('/wallet', function(req, res, next) {
       });
       res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
     });
+});
+
+router.put('/wallet', function(req, res, next) {
+    let walletRequest = whitelistParams(req.body);
+    let job = queue.create("UpdateWallet", walletRequest).save(function(err){
+      if( !err ) { 
+        console.log("Request for wallet update queued up [" + job.id + "]: " + JSON.stringify(walletRequest));
+      } else {
+        console.error(err);
+      }
+    });
+    res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
+
 });
 
 
