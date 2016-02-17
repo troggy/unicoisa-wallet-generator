@@ -8,7 +8,10 @@ let express = require('express'),
     config = require('../config'),
     fs = require('fs'),
     path = require('path'),
-    checkName = require('../lib/checkName');
+    _ = require('underscore'),
+    checkName = require('../lib/checkName'),
+    CreateTask = require('../worker/createTask'),
+    UpdateTask = require('../worker/updateTask');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -21,16 +24,8 @@ router.get('/name', function(req, res, next) {
 });
 
 var whitelistParams = function(params) {
-  return { 
-    walletName: params.walletName,
-    assetId: params.assetId,
-    assetName: params.assetName,
-    symbol: params.symbol,
-    pluralSymbol: params.pluralSymbol,
-    mainColor: params.mainColor,
-    secondaryColor: params.secondaryColor,
-    coluApiKey: params.coluApiKey
-  };
+  return _.pick(params, ['walletName', 'assetId', 'assetName', 'symbol',
+    'pluralSymbol', 'mainColor', 'secondaryColor', 'coluApiKey']);
 };
 
 var validateForCreate = function(params) {
@@ -78,14 +73,22 @@ router.post('/wallet', function(req, res, next) {
       }
       walletRequest.logo = files.file.name ? files.file.path : '';
       
-      let job = queue.create("NewWallet", walletRequest).save(function(err){
-        if( !err ) { 
-          console.log("Request for new wallet queued up [" + job.id + "]: " + JSON.stringify(walletRequest));
-        } else {
-          console.error(err);
+      walletRequest = {
+        wallet: walletRequest,
+        job: {
+          templateCopayDir: config.templateCopayDir,
+          targetDir: config.targetDir
         }
-      });
-      res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
+      };
+      new CreateTask(walletRequest).execute()
+        .then(function() {
+          console.log(`Done: http://${walletRequest.wallet.walletName}.coluwalletservice.com`);
+          res.render('queued', { link: `http://${walletRequest.wallet.walletName}.coluwalletservice.com` });
+        })
+        .catch(function(err) {
+          console.log(`Failed to process "${walletRequest.wallet.walletName}" request: ` + err);
+          res.status(500).send(err);
+        });
     });
 });
 
@@ -99,15 +102,22 @@ router.put('/wallet', function(req, res, next) {
       return;
     }
     
-    let job = queue.create("UpdateWallet", walletRequest).save(function(err){
-      if( !err ) { 
-        console.log("Request for wallet update queued up [" + job.id + "]: " + JSON.stringify(walletRequest));
-      } else {
-        console.error(err);
+    walletRequest = {
+      wallet: walletRequest,
+      job: {
+        templateCopayDir: config.templateCopayDir,
+        targetDir: config.targetDir
       }
-    });
-    res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
-
+    };
+    new UpdateTask(walletRequest).execute()
+      .then(function() {
+        console.log(`Updated: http://${walletRequest.wallet.walletName}.coluwalletservice.com`);
+        res.render('queued', { link: `http://${walletRequest.wallet.walletName}.coluwalletservice.com` });
+      })
+      .catch(function(err) {
+        console.log(`Failed to process update "${walletRequest.wallet.walletName}" request: ` + err);
+        res.status(500).send(err);
+      });
 });
 
 

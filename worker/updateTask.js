@@ -38,7 +38,8 @@ class UpdateTask extends Task {
   
   _updateConfigFile() {
       return this._readConfigFile().then((config) => {
-        this.params = _.extend(config, this.params);
+        let c = _.assign(config, this.params);
+        this.params = c;
       }).then(this._createConfigFile.bind(this));
   }
   
