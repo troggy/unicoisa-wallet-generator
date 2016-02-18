@@ -19,7 +19,6 @@ describe('UpdateTask', function() {
   
   let walletName = "walletName" + Math.random().toString(36).substring(7),
       defaultParams = {
-        wallet: {
           assetId: "assetId",
           assetName: "assetName",
           walletName: walletName,
@@ -28,18 +27,13 @@ describe('UpdateTask', function() {
           mainColor: "#ffab00",
           secondaryColor: "#333",
           coluApiKey: "bla"
-        },
-        job: {
-          targetDir: "/tmp",
-          templateCopayDir: "/tmp/copay",
-        }
       },
       params;
       
   before(() => {
     let task = new CreateTask(defaultParams);
     console.log(`${walletName}`);
-    return task._createConfigFile();
+    return task._storeWalletConfig().then(task._createConfigFile.bind(task));
   });
 
   
@@ -48,7 +42,7 @@ describe('UpdateTask', function() {
   });
   
   it('successfull flow', function () {
-    params.wallet = _.extend(params.wallet, {
+    params = _.extend(params, {
       assetId: "assetId!",
       assetName: "assetName!",
       symbol: "dollar!",
@@ -58,25 +52,16 @@ describe('UpdateTask', function() {
       coluApiKey: "bla"
     });
     let task = new UpdateTask(params);
-    return task._updateConfigFile().then(() => {
-        return Promise.promisify(fs.readFile)(task.configFileRaw).then((newConfig) => {
-            newConfig = JSON.parse(newConfig.toString());
-            _.isEqual(params.wallet, newConfig).should.be.true;
-        });
-    });
+    return task.execute().should.be.fulfilled;
   });
   
   it('should not allow changing api key', function () {
-    params.wallet = _.extend(params.wallet, {
+    params = _.extend(params, {
       coluApiKey: 'dfvdfvdf'
     });
     let task = new UpdateTask(params);
-    return task._updateConfigFile().then(() => {
-        return Promise.promisify(fs.readFile)(task.configFileRaw).then((newConfig) => {
-            newConfig = JSON.parse(newConfig.toString());
-            newConfig.coluApiKey.should.be.equal(defaultParams.wallet.coluApiKey);
-        });
-    });
+    return task.execute().should.be.fulfilled;
+    //todo
   });
 
 

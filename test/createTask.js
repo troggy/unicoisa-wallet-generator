@@ -9,6 +9,7 @@ let chai = require("chai"),
     rimraf = require('rimraf').sync,
     _ = require('underscore'),
     Promise = require('bluebird'),
+    config = require('../config'),
     CreateTask = require('../worker/createTask');
  
 chai.use(chaiAsPromised);
@@ -17,7 +18,6 @@ chai.should();
 describe('CreateTask', function() {
   
   let defaultParams = {
-    wallet: {
       assetId: "assetId",
       assetName: "assetName",
       walletName: "walletName",
@@ -26,14 +26,8 @@ describe('CreateTask', function() {
       mainColor: "#ffab00",
       secondaryColor: "#333",
       logo: "/tmp/logotipe.jpg"
-    },
-    job: {
-      targetDir: "/tmp",
-      templateCopayDir: "/tmp/copay",
-    }
   };
   let params;
-  
   CreateTask._nginxConfigDir = '/tmp/nginxConfig';
   if (!fs.existsSync(CreateTask._nginxConfigDir)) {
     fs.mkdirSync(CreateTask._nginxConfigDir);
@@ -52,9 +46,13 @@ describe('CreateTask', function() {
  this.timeout(15000);
 
  beforeEach(() => {
+   config.targetDir = "/tmp";
+   config.templateCopayDir = "/tmp/copay";
+
    params = JSON.parse(JSON.stringify(defaultParams));
-   let walletDir = path.join(defaultParams.job.targetDir, defaultParams.wallet.walletName);
+   let walletDir = path.join(config.targetDir, defaultParams.walletName);
    console.log(walletDir);
+   
   rimraf(walletDir, fs, () => {
     
   });
@@ -64,32 +62,22 @@ describe('CreateTask', function() {
   
  describe('#preconditions', function () {
     it('should require assetId', function () {
-      params.wallet.assetId = undefined;
+      params.assetId = undefined;
       expect(() => { new CreateTask(params)}).to.throw(Error);
     });
     
     it('should require assetName', function () {
-      params.wallet.assetName = undefined;
+      params.assetName = undefined;
       expect(() => { new CreateTask(params)}).to.throw(Error);
     });
 
     it('should require walletName', function () {
-      params.wallet.walletName = undefined;
-      expect(() => { new CreateTask(params)}).to.throw(Error);
-    });
-
-    it('should require templateCopayDir', function () {
-      params.job.templateCopayDir = undefined;
-      expect(() => { new CreateTask(params)}).to.throw(Error);
-    });
-    
-    it('should require targetDir', function () {
-      params.job.targetDir = undefined;
+      params.walletName = undefined;
       expect(() => { new CreateTask(params)}).to.throw(Error);
     });
 
     it('should use default symbol if needed', function () {
-      params.wallet.symbol = undefined;
+      params.symbol = undefined;
       let task = new CreateTask(params);
           
       task.params.symbol.should.eq('unit');
@@ -102,12 +90,11 @@ describe('CreateTask', function() {
     this.timeout(20000);
     
     it('successfull flow', function () {
-      console.log(params);
       return new CreateTask(params).execute().should.be.fulfilled;
     });
 
     it('should stop if step failed', function () {
-      params.job.templateCopayDir = "/tmp/copay2";
+      config.templateCopayDir = "/tmp/copay2";
       let task = new CreateTask(params);
       sinon.spy(task, '_createConfigFile');
       
@@ -136,8 +123,6 @@ describe('CreateTask', function() {
       return promise.then(() => {
         let configJs = fs.existsAsync(task.targetWalletDir + "/public/js/config.js");
         expect(configJs).to.eventually.equal(true, 'config.js should be generated');
-        let configRaw = fs.existsAsync(task.targetWalletDir + "/public/js/config.json");
-        expect(configRaw).to.eventually.equal(true, 'config.json should be generated');
       });
     });
     

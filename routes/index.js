@@ -102,19 +102,10 @@ router.post('/wallet', function(req, res, next) {
       let walletName = walletRequest.wallet.walletName;
       new CreateTask(walletRequest).execute()
         .then(function() {
-          let password = Math.random().toString(36).substring(7);
-          db.createWallet({
-            walletName: walletName,
-            password: password, 
-            settings: walletRequest.wallet
-          }).then(() => {
-            console.log(`Done: http://${walletName}.coluwalletservice.com`);
-            res.render('queued', { 
-              link: `http://${walletName}.coluwalletservice.com`,
-              login: walletName,
-              password: password 
-            });
-          })
+          console.log(`Done: http://${walletName}.coluwalletservice.com`);
+          res.render('queued', { 
+            link: `http://${walletName}.coluwalletservice.com`
+          });
         })
         .catch(function(err) {
           console.log(`Failed to process "${walletName}" request: ` + err);

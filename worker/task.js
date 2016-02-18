@@ -5,17 +5,17 @@ let path = require('path'),
     Handlebars = require('handlebars'),
     Promise = require('bluebird'),
     execute = require('./shell').execute,
+    config = require('../config'),
     checkName = require('../lib/checkName');
     
 class Task {
   
   constructor(params) {
     this._checkParams(params);
-    this.params = Object.assign({}, params.wallet);
-    this.targetDir = params.job.targetDir;
-    this.templateCopayDir = params.job.templateCopayDir;
-    this.targetWalletDir = path.join(this.targetDir, this.params.walletName);
-    this.configFileRaw = `${this.targetWalletDir}/public/js/config.json`;
+    this.params = Object.assign({}, params);
+    this.targetDir = config.targetDir;
+    this.templateCopayDir = config.templateCopayDir;
+    this.targetWalletDir = path.join(config.targetDir, this.params.walletName);
     this.configFileJs = `${this.targetWalletDir}/public/js/config.js`;
     if (this.params.logo) {
       this.params.logoPath = this.params.logo;
@@ -53,11 +53,6 @@ class Task {
   _createConfigFile() {
     return execute(`mkdir -p ${this.targetWalletDir}/public/js`).then(() => {
       return this._compileHbsFile('templates/config.tmpl.hbs', this.params, this.configFileJs);
-    }).then(() => {
-      return Promise.promisify(fs.writeFile)(
-        this.configFileRaw,
-        JSON.stringify(this.params, null, 2)
-      );
     });
   };
   

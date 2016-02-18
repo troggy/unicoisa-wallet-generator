@@ -4,6 +4,8 @@ let $ = require('preconditions').singleton(),
     fs = require('fs'),
     execute = require('./shell').execute,
     Promise = require('bluebird'),
+    db = require('../lib/db'),
+    config = require('../config'),
     _ = require('underscore'),
     Task = require('./task');
     
@@ -17,34 +19,39 @@ class UpdateTask extends Task {
   }
   
   _checkWalletName(params) {
-    var files = fs.readdirSync(params.job.targetDir)
-    if (files.indexOf(params.wallet.walletName) == -1) {
+    var files = fs.readdirSync(config.targetDir)
+    if (files.indexOf(params.walletName) == -1) {
       throw new Error(`No such wallet exist "${params.wallet.walletName}`);
     }
   };
   
   _checkParams(params) {
-    $.shouldBeDefined(params.job.targetDir, "targetDir is required");
-    
     this._checkWalletName(params);
   };
   
-  _readConfigFile() {
-    return Promise.promisify(fs.readFile)(`${this.targetWalletDir}/public/js/config.json`)
-          .then((configStr) => {
-            return JSON.parse(configStr);
-          });
+  _readConfig() {
+    return db.findWallet(this.params.walletName)
+      .then((wallet) => { 
+        this.walletConfig = wallet;
+        return wallet;
+      });
   };
   
-  _updateConfigFile() {
-      return this._readConfigFile().then((config) => {
-        let c = _.assign(config, this.params);
-        this.params = c;
-      }).then(this._createConfigFile.bind(this));
+  _storeConfig() {
+      return db.updateWallet(this.walletConfig);
+  };
+  
+  _updateConfig() {
+    console.log(this.params);
+      this.walletConfig.settings = Object.assign(this.walletConfig.settings, this.params)
+      this.params = this.walletConfig.settings;
   }
   
   execute() {
-    return this._updateConfigFile()
+    return this._readConfig()
+      .then(this._updateConfig.bind(this))
+      .then(this._storeConfig.bind(this))
+      .then(this._createConfigFile.bind(this))
       .then(this._copyLogo.bind(this));
   };
 }
