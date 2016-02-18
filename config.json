@@ -1,4 +1,5 @@
 {
   "targetDir": "/tmp",
-  "templateCopayDir": "/tmp/copay"
+  "templateCopayDir": "/tmp/copay",
+  "dbUrl": "mongodb://localhost:27017/wallets"
 }

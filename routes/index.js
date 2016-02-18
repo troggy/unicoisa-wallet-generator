@@ -9,9 +9,28 @@ let express = require('express'),
     fs = require('fs'),
     path = require('path'),
     _ = require('underscore'),
+    passport = require('passport'),
+    BasicStrategy = require('passport-http').BasicStrategy,
     checkName = require('../lib/checkName'),
+    db = require('../lib/db'),
     CreateTask = require('../worker/createTask'),
     UpdateTask = require('../worker/updateTask');
+    
+passport.use(new BasicStrategy(
+  function(username, password, cb) {
+    db.findWallet(username)
+      .then((wallet) => {
+        if (!wallet || wallet.password != password) { 
+          return cb(null, false);
+        }
+        console.log(wallet);
+        return cb(null, wallet);
+      })
+      .catch((e) => {
+        console.error(e);
+        return cb(e);
+      });
+  }));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -80,19 +99,36 @@ router.post('/wallet', function(req, res, next) {
           targetDir: config.targetDir
         }
       };
+      let walletName = walletRequest.wallet.walletName;
       new CreateTask(walletRequest).execute()
         .then(function() {
-          console.log(`Done: http://${walletRequest.wallet.walletName}.coluwalletservice.com`);
-          res.render('queued', { link: `http://${walletRequest.wallet.walletName}.coluwalletservice.com` });
+          let password = Math.random().toString(36).substring(7);
+          db.createWallet({
+            walletName: walletName,
+            password: password, 
+            settings: walletRequest.wallet
+          }).then(() => {
+            console.log(`Done: http://${walletName}.coluwalletservice.com`);
+            res.render('queued', { 
+              link: `http://${walletName}.coluwalletservice.com`,
+              login: walletName,
+              password: password 
+            });
+          })
         })
         .catch(function(err) {
-          console.log(`Failed to process "${walletRequest.wallet.walletName}" request: ` + err);
+          console.log(`Failed to process "${walletName}" request: ` + err);
           res.status(500).send(err);
         });
     });
 });
 
-router.put('/wallet', function(req, res, next) {
+router.put('/wallet', 
+  passport.authenticate('basic', { session: false }),
+  function(req, res, next) {
+    if (req.user.walletName != req.body.walletName) {
+      return res.status(403).send("You are not authorized to change this wallet");
+    }
     let walletRequest = whitelistParams(req.body),
         validationError = validateForUpdate(walletRequest);
     

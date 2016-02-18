@@ -1,12 +1,13 @@
-<div class="pure-g success-box">
-  <div class="pure-u-1-3">
-    <i class="fa fa-clock-o wait-icon"></i>
+<div class="success-box">
+  <p>Your request was processed.</p>
+  <p>Your wallet will be available shortly at: 
+    <a href="{{ link }}" class="wallet-link">{{ link }}</a>
+  </p>
+  <p>You can later edit your wallet settings using the following login/password:</p>
+  <div class="credentials">
+    <p><b>Login</b>: {{ login }}</p>
+    <p><b>Password</b>: {{ password }}</p>
   </div>
-  <div class="pure-u-2-3">
-    <p>Request is being processed.</p>
-    <p>Your wallet will be available shortly at: 
-      <a href="{{ link }}" class="wallet-link">{{ link }}</a>
-    </p>
-    <p>Thank you!</p>
-  </div>
+  <p>Please keep these in a safe place.</p>
+  <p>Thank you!</p>
 </div>
