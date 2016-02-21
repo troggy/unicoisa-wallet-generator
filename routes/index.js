@@ -76,11 +76,11 @@ var validateForUpdate = function(params) {
 };
 
 var respondToFormat = function(status, result, req, res, template) {
-  if (req.accepts('json')) {
+  if (req.accepts('json') && !req.accepts('html')) {
     res.setHeader('Content-Type', 'application/json');
     res.status(status).send(result);
   } else if (template) {
-    res.render(template, result);
+    res.status(status).render(template, result);
   } else {
     res.status(status).send(result);
   }
@@ -95,7 +95,7 @@ router.post('/wallet', function(req, res, next) {
           validationError = validateForCreate(walletRequest);
           
       if (validationError) {
-        return respondToFormat(400, { error : validationError}, req, res);
+        return respondToFormat(400, { message : validationError }, req, res, 'error');
       }
       walletRequest.logo = files.file.name ? files.file.path : '';
       
@@ -108,7 +108,7 @@ router.post('/wallet', function(req, res, next) {
         })
         .catch(function(err) {
           console.log(`Failed to process "${walletName}" request: ` + err);
-          respondToFormat(500, { error : err}, req, res);
+          respondToFormat(500, { message : err }, req, res, 'error');
         });
     });
 });
@@ -117,7 +117,7 @@ router.put('/wallet',
   passport.authenticate('basic', { session: false }),
   function(req, res, next) {
     if (req.user.walletName != req.body.walletName) {
-      return respondToFormat(403, { error : "You are not authorized to change this wallet"}, req, res);
+      return respondToFormat(403, { message : "You are not authorized to change this wallet" }, req, res, 'error');
     }
     next();
   },
@@ -126,8 +126,7 @@ router.put('/wallet',
         validationError = validateForUpdate(walletRequest);
     
     if (validationError) {
-      respondToFormat(400, { error : validationError}, req, res);
-      return;
+      return respondToFormat(400, { message : validationError }, req, res, 'error');
     }
     
     new UpdateTask(walletRequest).execute()
@@ -138,7 +137,7 @@ router.put('/wallet',
       })
       .catch(function(err) {
         console.log(`Failed to process update "${walletRequest.walletName}" request: ` + err);
-        respondToFormat(500, { error : err}, req, res);
+        respondToFormat(500, { message : err }, req, res, 'error');
       });
 });
 
