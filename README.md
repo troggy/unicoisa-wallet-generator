@@ -34,7 +34,9 @@ App copies nginx config to the /etc/nginx/sites-enabled and restarts nginx. It u
 
 ### Start app
 
-Process needs root privileges to configure and restart nginx, hence everything should be ran with ``sudo`` (yes, not good).
+````
+npm start
+````
 
 
 
