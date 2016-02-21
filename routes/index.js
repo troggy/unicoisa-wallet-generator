@@ -2,6 +2,7 @@
 
 let express = require('express'),
     formidable = require('formidable'),
+    Promise = require('bluebird'),
     router = express.Router(),
     config = require('../config'),
     fs = require('fs'),
@@ -11,24 +12,17 @@ let express = require('express'),
     BasicStrategy = require('passport-http').BasicStrategy,
     checkName = require('../lib/checkName'),
     db = require('../lib/db'),
+    users = require('../users.json'),
     CreateTask = require('../lib/createTask'),
     UpdateTask = require('../lib/updateTask');
     
 passport.use(new BasicStrategy(
   function(username, password, cb) {
-    db.findWallet(username)
-      .then((wallet) => {
-        if (!wallet || wallet.password != password) { 
-          return cb(null, false);
-        }
-        console.log(wallet);
-        return cb(null, wallet);
-      })
-      .catch((e) => {
-        console.error(e);
-        return cb(e);
-      });
-  }));
+    if (!users[username] || users[username] != password) {
+        return cb(null, false);
+    }
+    return cb(null, username);
+}));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -86,18 +80,32 @@ var respondToFormat = function(status, result, req, res, template) {
   }
 };
 
-router.post('/wallet', function(req, res, next) {
-
+var getParams = function(req) {
+  if (req.headers['content-type'].indexOf('multipart/form-data') < 0) {
+    //todo: logo?
+    return Promise.resolve(req.body);
+  } else {
     var form = new formidable.IncomingForm();
- 
-    form.parse(req, function(err, fields, files) {
-      let walletRequest = whitelistParams(fields),
-          validationError = validateForCreate(walletRequest);
+    
+    return new Promise((resolve, reject) => {
+        form.parse(req, (err, fields, files) => {
+          if (err) return reject(err);
+          fields.logo = files.file.name ? files.file.path : '';
+          return resolve(fields);
+        })
+    });
+  }
+};
+
+router.post('/wallet', function(req, res, next) {
+    getParams(req).then((params) => {
+      let walletRequest = whitelistParams(params);
+      
+      let validationError = validateForCreate(walletRequest);
           
       if (validationError) {
         return respondToFormat(400, { message : validationError }, req, res, 'error');
       }
-      walletRequest.logo = files.file.name ? files.file.path : '';
       
       let walletName = walletRequest.walletName;
       new CreateTask(walletRequest).execute()
@@ -116,10 +124,21 @@ router.post('/wallet', function(req, res, next) {
 router.put('/wallet', 
   passport.authenticate('basic', { session: false }),
   function(req, res, next) {
-    if (req.user.walletName != req.body.walletName) {
-      return respondToFormat(403, { message : "You are not authorized to change this wallet" }, req, res, 'error');
-    }
-    next();
+    db.findWallet(req.body.walletName)
+      .then((wallet) => {
+        if (!wallet) { 
+          return respondToFormat(404, { message : "No such wallet" }, req, res, 'error');
+        }
+        if (wallet.user != req.user) {
+          return respondToFormat(403, { message : "You are not authorized to change this wallet" }, req, res, 'error');
+        }
+        console.log(wallet);
+        next();
+      })
+      .catch((e) => {
+        console.error(e);
+        respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
+      });
   },
   function(req, res, next) {
     let walletRequest = whitelistParams(req.body),
