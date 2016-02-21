@@ -21,6 +21,7 @@
     "passport-http": "^0.3.0",
     "preconditions": "^1.0.8",
     "serve-favicon": "~2.3.0",
+    "temp": "^0.8.3",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
