@@ -92,14 +92,7 @@ router.post('/wallet', function(req, res, next) {
       }
       walletRequest.logo = files.file.name ? files.file.path : '';
       
-      walletRequest = {
-        wallet: walletRequest,
-        job: {
-          templateCopayDir: config.templateCopayDir,
-          targetDir: config.targetDir
-        }
-      };
-      let walletName = walletRequest.wallet.walletName;
+      let walletName = walletRequest.walletName;
       new CreateTask(walletRequest).execute()
         .then(function() {
           console.log(`Done: http://${walletName}.coluwalletservice.com`);
@@ -120,6 +113,9 @@ router.put('/wallet',
     if (req.user.walletName != req.body.walletName) {
       return res.status(403).send("You are not authorized to change this wallet");
     }
+    next();
+  },
+  function(req, res, next) {
     let walletRequest = whitelistParams(req.body),
         validationError = validateForUpdate(walletRequest);
     
@@ -129,20 +125,13 @@ router.put('/wallet',
       return;
     }
     
-    walletRequest = {
-      wallet: walletRequest,
-      job: {
-        templateCopayDir: config.templateCopayDir,
-        targetDir: config.targetDir
-      }
-    };
     new UpdateTask(walletRequest).execute()
       .then(function() {
-        console.log(`Updated: http://${walletRequest.wallet.walletName}.coluwalletservice.com`);
-        res.render('queued', { link: `http://${walletRequest.wallet.walletName}.coluwalletservice.com` });
+        console.log(`Updated: http://${walletRequest.walletName}.coluwalletservice.com`);
+        res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
       })
       .catch(function(err) {
-        console.log(`Failed to process update "${walletRequest.wallet.walletName}" request: ` + err);
+        console.log(`Failed to process update "${walletRequest.walletName}" request: ` + err);
         res.status(500).send(err);
       });
 });

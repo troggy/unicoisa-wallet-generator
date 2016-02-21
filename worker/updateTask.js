@@ -5,6 +5,7 @@ let $ = require('preconditions').singleton(),
     execute = require('./shell').execute,
     Promise = require('bluebird'),
     db = require('../lib/db'),
+    path = require('path'),
     config = require('../config'),
     _ = require('underscore'),
     Task = require('./task');
@@ -16,12 +17,12 @@ class UpdateTask extends Task {
     if (this.params.coluApiKey) {
       delete this.params.coluApiKey;
     };
+    console.log(`Task params to update: ${JSON.stringify(this.params)}`);
   }
   
   _checkWalletName(params) {
-    var files = fs.readdirSync(config.targetDir)
-    if (files.indexOf(params.walletName) == -1) {
-      throw new Error(`No such wallet exist "${params.wallet.walletName}`);
+    if (!fs.existsSync(path.join(config.targetDir, params.walletName))) {
+      throw new Error(`No such wallet exist "${params.walletName}`);
     }
   };
   
@@ -30,6 +31,7 @@ class UpdateTask extends Task {
   };
   
   _readConfig() {
+    console.log('Reading config..');
     return db.findWallet(this.params.walletName)
       .then((wallet) => { 
         this.walletConfig = wallet;
@@ -38,21 +40,31 @@ class UpdateTask extends Task {
   };
   
   _storeConfig() {
+    console.log('Saving config..');
       return db.updateWallet(this.walletConfig);
   };
   
   _updateConfig() {
-    console.log(this.params);
-      this.walletConfig.settings = Object.assign(this.walletConfig.settings, this.params)
-      this.params = this.walletConfig.settings;
+    console.log('Updating config..');
+    
+    let originalSettings = _.clone(this.walletConfig.settings);
+    Object.assign(this.walletConfig.settings, this.params);
+    let isUpdated = !_.isEqual(originalSettings, this.walletConfig.settings);
+    this.params = this.walletConfig.settings;
+    return Promise.resolve(isUpdated);
   }
   
   execute() {
     return this._readConfig()
       .then(this._updateConfig.bind(this))
-      .then(this._storeConfig.bind(this))
-      .then(this._createConfigFile.bind(this))
-      .then(this._copyLogo.bind(this));
+      .then((isUpdated) => {
+        if (!isUpdated) return false;
+        
+        return this._storeConfig()
+        .then(this._createConfigFile.bind(this))
+        .then(this._copyLogo.bind(this))
+        .then(() => { return true; });
+      });
   };
 }
 

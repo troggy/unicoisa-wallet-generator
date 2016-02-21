@@ -44,6 +44,7 @@ class Task {
   };
   
   _copyLogo() {
+    console.log('Copying logo..');
     if (this.params.logo) {
       fs.createReadStream(this.params.logoPath).pipe(fs.createWriteStream(`${this.targetWalletDir}/public/img/${this.params.logo}`));
       fs.createReadStream(this.params.logoPath).pipe(fs.createWriteStream(`${this.targetWalletDir}/public/img/${this.params.logo}`));
@@ -51,6 +52,7 @@ class Task {
   };
   
   _createConfigFile() {
+    console.log('Creating config file..');
     return execute(`mkdir -p ${this.targetWalletDir}/public/js`).then(() => {
       return this._compileHbsFile('templates/config.tmpl.hbs', this.params, this.configFileJs);
     });
