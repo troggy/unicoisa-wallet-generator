@@ -3,8 +3,6 @@
 let express = require('express'),
     formidable = require('formidable'),
     router = express.Router(),
-    kue = require('kue'),
-    queue = kue.createQueue(),
     config = require('../config'),
     fs = require('fs'),
     path = require('path'),
@@ -77,6 +75,17 @@ var validateForUpdate = function(params) {
   }
 };
 
+var respondToFormat = function(status, result, req, res, template) {
+  if (req.accepts('json')) {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(status).send(result);
+  } else if (template) {
+    res.render(template, result);
+  } else {
+    res.status(status).send(result);
+  }
+};
+
 router.post('/wallet', function(req, res, next) {
 
     var form = new formidable.IncomingForm();
@@ -86,23 +95,20 @@ router.post('/wallet', function(req, res, next) {
           validationError = validateForCreate(walletRequest);
           
       if (validationError) {
-        res.status(400).send(validationError);
-        res.end();
-        return;
+        return respondToFormat(400, { error : validationError}, req, res);
       }
       walletRequest.logo = files.file.name ? files.file.path : '';
       
       let walletName = walletRequest.walletName;
       new CreateTask(walletRequest).execute()
         .then(function() {
-          console.log(`Done: http://${walletName}.coluwalletservice.com`);
-          res.render('queued', { 
-            link: `http://${walletName}.coluwalletservice.com`
-          });
+          let result = { link: `http://${walletRequest.walletName}.coluwalletservice.com` };
+          console.log(`Done: ${result.link}`);
+          respondToFormat(200, result, req, res, 'created');
         })
         .catch(function(err) {
           console.log(`Failed to process "${walletName}" request: ` + err);
-          res.status(500).send(err);
+          respondToFormat(500, { error : err}, req, res);
         });
     });
 });
@@ -111,7 +117,7 @@ router.put('/wallet',
   passport.authenticate('basic', { session: false }),
   function(req, res, next) {
     if (req.user.walletName != req.body.walletName) {
-      return res.status(403).send("You are not authorized to change this wallet");
+      return respondToFormat(403, { error : "You are not authorized to change this wallet"}, req, res);
     }
     next();
   },
@@ -120,19 +126,19 @@ router.put('/wallet',
         validationError = validateForUpdate(walletRequest);
     
     if (validationError) {
-      res.status(400).send(validationError);
-      res.end();
+      respondToFormat(400, { error : validationError}, req, res);
       return;
     }
     
     new UpdateTask(walletRequest).execute()
       .then(function() {
-        console.log(`Updated: http://${walletRequest.walletName}.coluwalletservice.com`);
-        res.render('queued', { link: `http://${walletRequest.walletName}.coluwalletservice.com` });
+        let result = { link: `http://${walletRequest.walletName}.coluwalletservice.com` };
+        console.log(`Updated: ${result.link}`);
+        respondToFormat(200, result, req, res, 'updated');
       })
       .catch(function(err) {
         console.log(`Failed to process update "${walletRequest.walletName}" request: ` + err);
-        res.status(500).send(err);
+        respondToFormat(500, { error : err}, req, res);
       });
 });
 
