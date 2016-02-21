@@ -9,8 +9,8 @@ let chai = require("chai"),
     rimraf = require('rimraf').sync,
     Promise = require('bluebird'),
     _ = require('underscore'),
-    CreateTask = require('../worker/createTask'),
-    UpdateTask = require('../worker/updateTask');
+    CreateTask = require('../lib/createTask'),
+    UpdateTask = require('../lib/updateTask');
  
 chai.use(chaiAsPromised);
 chai.should();

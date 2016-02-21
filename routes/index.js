@@ -11,8 +11,8 @@ let express = require('express'),
     BasicStrategy = require('passport-http').BasicStrategy,
     checkName = require('../lib/checkName'),
     db = require('../lib/db'),
-    CreateTask = require('../worker/createTask'),
-    UpdateTask = require('../worker/updateTask');
+    CreateTask = require('../lib/createTask'),
+    UpdateTask = require('../lib/updateTask');
     
 passport.use(new BasicStrategy(
   function(username, password, cb) {

@@ -10,7 +10,7 @@ let chai = require("chai"),
     _ = require('underscore'),
     Promise = require('bluebird'),
     config = require('../config'),
-    CreateTask = require('../worker/createTask');
+    CreateTask = require('../lib/createTask');
  
 chai.use(chaiAsPromised);
 chai.should();
