@@ -108,7 +108,7 @@ router.post('/wallet', function(req, res, next) {
         })
         .catch(function(err) {
           console.log(`Failed to process "${walletName}" request: ` + err);
-          respondToFormat(500, { message : err }, req, res, 'error');
+          respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
         });
     });
 });
@@ -137,7 +137,7 @@ router.put('/wallet',
       })
       .catch(function(err) {
         console.log(`Failed to process update "${walletRequest.walletName}" request: ` + err);
-        respondToFormat(500, { message : err }, req, res, 'error');
+        respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
       });
 });
 
