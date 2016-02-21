@@ -4,6 +4,10 @@ Simple Web UI to generate brand new single digital asset wallet (project [Unicoi
 
 ## Installation
 
+### Prerequisites
+
+- MongoDb
+
 ### Install app
 1. ``git clone https://github.com/troggy/unicoisa-wallet-generator``
 2. ``npm install``
