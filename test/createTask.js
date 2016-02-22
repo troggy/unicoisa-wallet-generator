@@ -110,26 +110,27 @@ describe('CreateTask', function() {
       return promise.should.be.rejected;
     });
     
-    it('should create copay copy', function(done) {
+    it('should create copay copy', function() {
       let task = new CreateTask(params);
-      let promise = task._createCopayCopy();
-      promise.should.be.fulfilled;
-      promise.then(() => {
-        fs.existsSync(task.targetWalletDir + "/public").should.be.true;
-        done();
-      });
+      return task
+        ._createCopayCopy()
+        .then(() => {
+          return fs.existsAsync(task.targetWalletDir + "/public");
+        }).then((walletFolder) => {
+          walletFolder.should.be.true;
+        });
     });
 
     
     it('should create config file', function() {
-      let task = new CreateTask(params),
-          promise = task._createConfigFile(),
-          exists = Promise.promisify(fs.exists);
-      promise.should.be.fulfilled;
-      return promise.then(() => {
-        let configJs = fs.existsAsync(task.targetWalletDir + "/public/js/config.js");
-        expect(configJs).to.eventually.equal(true, 'config.js should be generated');
-      });
+      let task = new CreateTask(params);
+      return task
+        ._createConfigFile()
+        .then(() => {
+          return fs.existsAsync(task.targetWalletDir + "/public/js/config.js");
+        }).then((configJs) => {
+          configJs.should.be.true;
+        });
     });
     
     it('should generate nginx config', function() {

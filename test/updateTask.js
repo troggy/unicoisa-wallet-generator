@@ -9,6 +9,7 @@ let chai = require("chai"),
     rimraf = require('rimraf').sync,
     Promise = require('bluebird'),
     _ = require('underscore'),
+    db = require('../lib/db'),
     CreateTask = require('../lib/createTask'),
     UpdateTask = require('../lib/updateTask');
  
@@ -60,8 +61,25 @@ describe('UpdateTask', function() {
       coluApiKey: 'dfvdfvdf'
     });
     let task = new UpdateTask(params);
-    return task.execute().should.be.fulfilled;
-    //todo
+    return task.execute().then(() => {
+      return db.findWallet(params.walletName);
+    }).then((wallet) => {
+      console.log(wallet);
+      wallet.coluApiKey.should.be.equal(defaultParams.coluApiKey);
+    });
+  });
+  
+  it('should not allow changing assetId', function () {
+    params = _.extend(params, {
+      assetId: 'dfvdfvdf'
+    });
+    let task = new UpdateTask(params);
+    return task.execute().then(() => {
+      return db.findWallet(params.walletName);
+    }).then((wallet) => {
+      console.log(wallet);
+      wallet.assetId.should.be.equal(defaultParams.assetId);
+    });
   });
 
 
