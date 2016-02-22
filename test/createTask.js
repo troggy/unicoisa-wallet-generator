@@ -138,5 +138,17 @@ describe('CreateTask', function() {
       let promise = task._configureNginx();
       return promise.should.be.fulfilled;
     });
+    
+    it('should create custom logo', function() {
+      let task = new CreateTask(params);
+      return task
+        ._createCopayCopy()
+        .then(task._copyLogo.bind(task))
+        .then(() => {
+          return fs.existsAsync(task.targetWalletDir + "/public/img/custom-logo.jpg");
+        }).then((logoFile) => {
+          logoFile.should.be.true;
+        });
+    });
   });
 });
