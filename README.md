@@ -42,5 +42,40 @@ App copies nginx config to the /etc/nginx/sites-enabled and restarts nginx. It u
 npm start
 ````
 
+## API
 
+API uses HTTP Basic authentication.
 
+### Create wallet
+Endpoint: ``POST /api/wallet``
+Payload:
+````
+{
+  walletName: "name of the wallet to change (mandatory)",
+  assetId: "assetId (mandatory)",
+  assetName: "name of the asset (mandatory)",
+  mainColor: "#xxxxxx code of the main wallet color",
+  secondaryColor: "#xxxxxx code of the secondary wallet color",
+  symbol: "symbol/ticker for the asset currency",
+  pluralSymbol: "plural form of the symbol",
+  logo: "logo could be uploaded only with multipart/form-data requests",
+  coluApiKey: "api key for Colu SDK"
+}
+````
+
+### Change wallet
+Colu API key, assetId and wallet name cannot be changed.
+
+Endpoint: ``PUT /api/wallet``
+Payload:
+````
+{
+  walletName: "name of the wallet to change",
+  assetName: "name of the asset",
+  mainColor: "#xxxxxx code of the main wallet color",
+  secondaryColor: "#xxxxxx code of the secondary wallet color",
+  symbol: "symbol/ticker for the asset currency",
+  pluralSymbol: "plural form of the symbol",
+  logo: "logo could be uploaded only with multipart/form-data requests",
+}
+````
