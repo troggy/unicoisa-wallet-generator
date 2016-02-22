@@ -43,20 +43,20 @@
             </div>
             
             <div class="pure-g pure-control-group field">
-                <div class="pure-u-1-3">
+                <div class="pure-u-1-2">
                   <label>Main color</label>
-                  <div class="main-color">
-                    <input type="hidden" id="mainColorValue", name="mainColor" value="#2980b9"/>
+                  <div class="color-field main-color">
+                    <input type="text" id="mainColorValue", name="mainColor" value="#2980b9"/>
                     <div id="mainColor" class="selected-color">
                     </div>
                     <div class="color-picker">
                     </div>
                   </div>
                 </div>
-                <div class="pure-u-1-3">
+                <div class="pure-u-1-2">
                   <label>Secondary color</label>
-                  <div class="secondary-color">
-                    <input type="hidden" id="secondaryColorValue" name="secondaryColor" value="#2C3E50"/>
+                  <div class="color-field secondary-color">
+                    <input type="text" id="secondaryColorValue" name="secondaryColor" value="#2C3E50"/>
                     <div id="secondaryColor" class="selected-color">
                     </div>
                     <div class="color-picker">
@@ -95,7 +95,11 @@
       darkColors = ['#443161', '#3B3162', '#313C61', '#314D5E', '#304544', '#304939',
                     '#475130', '#3E3E30', '#3E3730', '#3E3430', '#3B3036', '#383039',
                     '#353139', '#31313A', '#303937'],
-      walletName = document.getElementById('walletName');
+      walletName = document.getElementById('walletName'),
+      mainColor = document.getElementById('mainColorValue'),
+      mainColorPreview = document.getElementById('mainColor'),
+      secondaryColor = document.getElementById('secondaryColorValue'),
+      secondaryColorPreview = document.getElementById('secondaryColor');
   
   document.getElementById('uploadInput').addEventListener('change', utils.showFile);
   
@@ -123,15 +127,23 @@
   );
 
   mainPk.colorChosen(function (col) {
-    document.getElementById('mainColor').style.backgroundColor = col;
-    document.getElementById('mainColorValue').value = col;
+    mainColorPreview.style.backgroundColor = col;
+    mainColor.value = col;
   });
     
   secondaryPk.colorChosen(function (col) {
-    document.getElementById('secondaryColor').style.backgroundColor = col;
-    document.getElementById('secondaryColorValue').value = col;
+    secondaryColorPreview.style.backgroundColor = col;
+    secondaryColor.value = col;
   });
   
+  mainColor.addEventListener('keyup', function(e) {
+      mainColorPreview.style.backgroundColor = mainColor.value;
+  });
+  
+  secondaryColor.addEventListener('keyup', function(e) {
+      secondaryColorPreview.style.backgroundColor = secondaryColor.value;
+  });
+
   mainPk.set('#2980b9');
   secondaryPk.set('#2C3E50');
   
