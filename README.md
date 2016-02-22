@@ -33,7 +33,7 @@ App copies nginx config to the /etc/nginx/sites-enabled and restarts nginx. It u
 - edit ``/etc/sudoers`` (use ``visudo`` for your safety) to allow certain commands to run without password prompt:
 ````
 <USERNAME> ALL=NOPASSWD:<PATH_TO_WALLET_GENERATOR>/scripts/copy_nginx_config.sh
-<USERNAME> ALL=NOPASSWD:/usr/bin/service nginx restart
+<USERNAME> ALL=NOPASSWD:/usr/bin/service nginx reload
 ````
 
 ### Start app
