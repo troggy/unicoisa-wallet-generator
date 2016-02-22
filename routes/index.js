@@ -17,22 +17,13 @@ let express = require('express'),
     UpdateTask = require('../lib/updateTask');
     
 passport.use(new BasicStrategy(
-  function(username, password, cb) {
-    if (!users[username] || users[username] != password) {
-        return cb(null, false);
-    }
-    return cb(null, username);
-}));
-
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index');
-});
-
-router.get('/name', function(req, res, next) {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(checkName(req.query.walletName));
-});
+      function(username, password, cb) {
+        if (!users[username] || users[username] != password) {
+            return cb(null, false);
+        }
+        return cb(null, username);
+    })
+);
 
 var whitelistParams = function(params) {
   return _.pick(params, ['walletName', 'assetId', 'assetName', 'symbol',
@@ -97,68 +88,104 @@ var getParams = function(req) {
   }
 };
 
-router.post('/wallet', function(req, res, next) {
-    getParams(req).then((params) => {
-      let walletRequest = whitelistParams(params);
-      
-      let validationError = validateForCreate(walletRequest);
-          
-      if (validationError) {
-        return respondToFormat(400, { message : validationError }, req, res, 'error');
+var createWallet = function(req, res, next) {
+  getParams(req).then((params) => {
+     let walletRequest = whitelistParams(params);
+     walletRequest.user = req.user;
+     
+     let validationError = validateForCreate(walletRequest);
+         
+     if (validationError) {
+       return respondToFormat(400, { message : validationError }, req, res, 'error');
+     }
+     
+     let walletName = walletRequest.walletName;
+     new CreateTask(walletRequest).execute()
+       .then(function() {
+         let result = { link: `http://${walletRequest.walletName}.coluwalletservice.com` };
+         console.log(`Done: ${result.link}`);
+         respondToFormat(200, result, req, res, 'created');
+       })
+       .catch(function(err) {
+         console.log(`Failed to process "${walletName}" request: ` + err);
+         respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
+       });
+   });
+};
+
+var authorizeUpdate = function(req, res, next) {
+  db.findWallet(req.body.walletName)
+    .then((wallet) => {
+      if (!wallet) { 
+        return respondToFormat(404, { message : "No such wallet" }, req, res, 'error');
       }
-      
-      let walletName = walletRequest.walletName;
-      new CreateTask(walletRequest).execute()
-        .then(function() {
-          let result = { link: `http://${walletRequest.walletName}.coluwalletservice.com` };
-          console.log(`Done: ${result.link}`);
-          respondToFormat(200, result, req, res, 'created');
-        })
-        .catch(function(err) {
-          console.log(`Failed to process "${walletName}" request: ` + err);
-          respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
-        });
+      if (wallet.user != req.user) {
+        return respondToFormat(403, { message : "You are not authorized to change this wallet" }, req, res, 'error');
+      }
+      console.log(wallet);
+      next();
+    })
+    .catch((e) => {
+      console.error(e);
+      respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
     });
+};
+
+var updateWallet = function(req, res, next) {
+  let walletRequest = whitelistParams(req.body),
+      validationError = validateForUpdate(walletRequest);
+  
+  if (validationError) {
+    return respondToFormat(400, { message : validationError }, req, res, 'error');
+  }
+  
+  new UpdateTask(walletRequest).execute()
+    .then(function() {
+      let result = { link: `http://${walletRequest.walletName}.coluwalletservice.com` };
+      console.log(`Updated: ${result.link}`);
+      respondToFormat(200, result, req, res, 'updated');
+    })
+    .catch(function(err) {
+      console.log(`Failed to process update "${walletRequest.walletName}" request: ` + err);
+      respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
+    });
+};
+
+/* GET home page. */
+
+router.get('/', function(req, res, next) {
+  res.render('index');
 });
 
-router.put('/wallet', 
-  passport.authenticate('basic', { session: false }),
-  function(req, res, next) {
-    db.findWallet(req.body.walletName)
-      .then((wallet) => {
-        if (!wallet) { 
-          return respondToFormat(404, { message : "No such wallet" }, req, res, 'error');
-        }
-        if (wallet.user != req.user) {
-          return respondToFormat(403, { message : "You are not authorized to change this wallet" }, req, res, 'error');
-        }
-        console.log(wallet);
-        next();
-      })
-      .catch((e) => {
-        console.error(e);
-        respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
-      });
-  },
-  function(req, res, next) {
-    let walletRequest = whitelistParams(req.body),
-        validationError = validateForUpdate(walletRequest);
-    
-    if (validationError) {
-      return respondToFormat(400, { message : validationError }, req, res, 'error');
-    }
-    
-    new UpdateTask(walletRequest).execute()
-      .then(function() {
-        let result = { link: `http://${walletRequest.walletName}.coluwalletservice.com` };
-        console.log(`Updated: ${result.link}`);
-        respondToFormat(200, result, req, res, 'updated');
-      })
-      .catch(function(err) {
-        console.log(`Failed to process update "${walletRequest.walletName}" request: ` + err);
-        respondToFormat(500, { message : 'Failed to process request' }, req, res, 'error');
-      });
+/* POST new wallet from the homepage. No authentication. Will be created for anonymous user */
+router.post('/wallet',
+ function(req, res, next) {
+   req.user = 'anon';
+   createWallet(req, res, next);
 });
+
+
+/* API */
+
+/* GET error if wallet name is incorrect or unvailable */
+router.get('/api/name', function(req, res, next) {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(checkName(req.query.walletName));
+});
+
+/* POST new wallet. Request must be authenticated */
+router.post('/api/wallet',
+  passport.authenticate('basic', { session: false }),
+  createWallet
+);
+
+/* PUT updated wallet. Request must be authenticated and authorized to update
+   given wallet */
+router.put('/api/wallet', 
+  passport.authenticate('basic', { session: false }),
+  authorizeUpdate,
+  updateWallet
+);
 
 
 module.exports = router;

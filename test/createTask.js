@@ -29,6 +29,11 @@ describe('CreateTask', function() {
   };
   let params;
   CreateTask._nginxConfigDir = '/tmp/nginxConfig';
+  
+  if (!fs.existsSync(defaultParams.logo)) {
+    fs.writeFileSync(defaultParams.logo, '');
+  }
+  
   if (!fs.existsSync(CreateTask._nginxConfigDir)) {
     fs.mkdirSync(CreateTask._nginxConfigDir);
   }
@@ -36,6 +41,7 @@ describe('CreateTask', function() {
   if (!fs.existsSync('/tmp/copay')) {
     fs.mkdirSync('/tmp/copay');
     fs.mkdirSync('/tmp/copay/public');
+    fs.mkdirSync('/tmp/copay/public/img');
   }
   
   fs.existsAsync = Promise.promisify

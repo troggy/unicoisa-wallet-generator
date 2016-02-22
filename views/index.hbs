@@ -100,7 +100,7 @@
   document.getElementById('uploadInput').addEventListener('change', utils.showFile);
   
   var debouncedCall = utils.debounce(function(val) {
-      utils.get('/name?walletName=' + encodeURIComponent(val), function(err, data) {
+      utils.get('/api/name?walletName=' + encodeURIComponent(val), function(err, data) {
           if (err) {
             console.error(err);
             walletName.setCustomValidity('Cannot verify wallet name');
