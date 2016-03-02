@@ -27,7 +27,7 @@ passport.use(new BasicStrategy(
 
 var whitelistParams = function(params) {
   return _.pick(params, ['walletName', 'assetId', 'assetName', 'symbol',
-    'pluralSymbol', 'mainColor', 'secondaryColor', 'coluApiKey', 'logo']);
+    'pluralSymbol', 'mainColor', 'secondaryColor', 'coluApiKey', 'logo', 'logoUrl']);
 };
 
 var validateForCreate = function(params) {

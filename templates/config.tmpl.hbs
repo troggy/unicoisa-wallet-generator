@@ -2,10 +2,15 @@ window.unicoisaConfig = {
   walletName: "{{walletName}}",
   mainColor: "{{mainColor}}",
   secondaryColor: "{{secondaryColor}}",
-  assetId: "{{assetId}}",
-  name: "{{assetName}}",
-  symbol: "{{symbol}}",
-  pluralSymbol: "{{pluralSymbol}}",
+  assets: [
+    {
+      assetId: '{{assetId}}',
+      name: '{{assetName}}',
+      symbol: '{{symbol}}',
+      pluralSymbol: '{{pluralSymbol}}'
+    }
+  ],
+  defaultAsset: '{{assetId}}',
   logo: "{{logo}}",
   coluApiKey: "{{coluApiKey}}"
 };
