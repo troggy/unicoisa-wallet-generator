@@ -59,6 +59,7 @@ Payload:
   symbol: "symbol/ticker for the asset currency",
   pluralSymbol: "plural form of the symbol",
   logo: "logo could be uploaded only with multipart/form-data requests",
+  logoUrl: "logo URL (e.g. from CDN). If both logoUrl and logo bytes supplied, logoUrl will be used",
   coluApiKey: "api key for Colu SDK"
 }
 ````
@@ -77,5 +78,6 @@ Payload:
   symbol: "symbol/ticker for the asset currency",
   pluralSymbol: "plural form of the symbol",
   logo: "logo could be uploaded only with multipart/form-data requests",
+  logoUrl: "logo URL (e.g. from CDN). If both logoUrl and logo bytes supplied, logoUrl will be used"
 }
 ````
